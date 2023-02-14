@@ -17,17 +17,29 @@ class Game {
 		sf::Event ev;
 		void initVariables();
 		void initWindow();
+		void playKillSound();
+		void playDamageSound();
+		void playGameOverSound();
+		void playSoundTrack();
 		void initEnemies();
+		void initFont();
+		void endGame();
 
 		// Mouse positions
 		sf::Vector2i mousePosWindow;
 		sf::Vector2f mousePosView;
 
+		// Game sounds
+		sf::SoundBuffer popBuffer;
+		sf::Sound popSound;
+		sf::SoundBuffer damageBuffer;
+		sf::Sound damageSound;
+
+		sf::Music gameOverSound;
+		sf::Music soundTrack;
+
 		// Game logic
-		int points;
-		float enemySpawnTimer;
-		float enemySpawnTimerMax;
-		int maxEnemies;
+		
 
 		// Game objects
 		std::vector<sf::RectangleShape> enemies;
@@ -44,9 +56,16 @@ class Game {
 		// Functions
 		void spawnEnemies();
 		void updateMousePositions();
+		void updateGameStatus();
 		void updateEnemies();
 		void pollEvents();
 		void update();
 		void renderEnemies();
 		void render();
+
+		int points;
+		int lifes;
+		float enemySpawnTimer;
+		float enemySpawnTimerMax;
+		int maxEnemies;
 };

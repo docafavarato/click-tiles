@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "menu.h"
 #include <iostream>
 
 int main() {
@@ -6,18 +7,19 @@ int main() {
     std::srand(static_cast<unsigned>(time(NULL)));
 
     // Init game engine
-    Game game;
+    Menu menu;
 
     // Game loop
-    while (game.running()) {
+    while (menu.running()) {
 
         // Update
-        game.update();
+        menu.update();
 
         // Render
-        game.render();
+        menu.render();
 
     }
 
     return 0;
 }
+
