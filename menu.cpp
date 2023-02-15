@@ -11,12 +11,12 @@ Menu::Menu() {
 	text[0].setPosition(sf::Vector2f(600 / 2, 600 / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 	text[1].setFont(font);
-	text[1].setFillColor(sf::Color::White);
+	text[1].setFillColor(sf::Color::Red);
 	text[1].setString("Medium");
 	text[1].setPosition(sf::Vector2f(600 / 2, 600 / (MAX_NUMBER_OF_ITEMS + 1) + 60));
 
 	text[2].setFont(font);
-	text[2].setFillColor(sf::Color::White);
+	text[2].setFillColor(sf::Color::Red);
 	text[2].setString("Hard");
 	text[2].setPosition(sf::Vector2f(600 / 2, 600 / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 
@@ -31,12 +31,20 @@ Menu::Menu() {
 	this->initWindow();
 }
 
+void Menu::playMenuSelectionSound() {
+	selectionBuffer.loadFromFile("menu_selection.wav");
+	selectionSound.setBuffer(selectionBuffer);
+	selectionSound.play();
+}
+
 void Menu::MoveUp() {
 	if (selectedItemIndex - 1 >= 0) {
 		text[selectedItemIndex].setFillColor(sf::Color::Red);
 		selectedItemIndex--;
 		text[selectedItemIndex].setFillColor(sf::Color::White);
 	}
+
+	this->playMenuSelectionSound();
 }
 
 void Menu::MoveDown() {
@@ -45,9 +53,10 @@ void Menu::MoveDown() {
 		selectedItemIndex++;
 		text[selectedItemIndex].setFillColor(sf::Color::White);
 	}
+
+	this->playMenuSelectionSound();
 }
 
-///////////////////////////////////////////
 
 void Menu::initVariables() {
 	this->window = nullptr;
@@ -60,37 +69,6 @@ void Menu::initWindow() {
 	this->window->setFramerateLimit(60);
 
 }
-
-/* void Menu::initFont() {
-	sf::Font font;
-	sf::Text pointsText;
-	sf::Text difficultyText;
-	sf::Text lifesText;
-
-	font.loadFromFile("metropolian-1.ttf");
-
-	difficultyText.setFont(font);
-	difficultyText.setFillColor(sf::Color::White);
-	difficultyText.setCharacterSize(20);
-	difficultyText.setString("Difficulty: Easy");
-	difficultyText.setPosition(600.f, 10.f);
-
-	lifesText.setFont(font);
-	lifesText.setFillColor(sf::Color::White);
-	lifesText.setCharacterSize(20);
-	lifesText.setString("Lifes: " + std::to_string(this->lifes));
-	lifesText.setPosition(600.f, 40.f);
-
-	pointsText.setFont(font);
-	pointsText.setFillColor(sf::Color::White);
-	pointsText.setCharacterSize(40);
-	pointsText.setString("Points: " + std::to_string(this->points));
-	pointsText.setPosition(10.f, 10.f);
-
-	this->window->draw(pointsText);
-	this->window->draw(difficultyText);
-	this->window->draw(lifesText);
-}*/
 
 void Menu::pollEvents() {
 	while (this->window->pollEvent(this->ev)) {
@@ -108,6 +86,8 @@ void Menu::pollEvents() {
 			if (ev.key.code == sf::Keyboard::Enter) {
 				Game game;
 				if (this->getPressedItem() == 0) {
+					game.difficulty = "Easy";
+					game.lifes = 30000;
 					while (game.running()) {
 						game.update();
 						game.render();
@@ -115,6 +95,7 @@ void Menu::pollEvents() {
 				}
 
 				if (this->getPressedItem() == 1) {
+					game.difficulty = "Medium";
 					game.lifes = 2;
 					game.enemySpawnTimer = 20.f;
 					game.maxEnemies = 7;
@@ -125,6 +106,7 @@ void Menu::pollEvents() {
 				}
 
 				if (this->getPressedItem() == 2) {
+					game.difficulty = "Hard";
 					game.lifes = 1;
 					game.enemySpawnTimer = 10.f;
 					game.maxEnemies = 10;

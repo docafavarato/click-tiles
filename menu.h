@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include "SFML/Audio.hpp"
 #include <iostream>
 
 #define MAX_NUMBER_OF_ITEMS 4
@@ -12,6 +13,7 @@ class Menu {
 		void initWindow();
 		void update();
 		void render();
+		void playMenuSelectionSound();
 		void MoveUp();
 		void MoveDown();
 		void pollEvents();
@@ -30,4 +32,6 @@ class Menu {
 		sf::Font font;
 		sf::Text text[MAX_NUMBER_OF_ITEMS];
 		sf::Text instructions;
+		sf::SoundBuffer selectionBuffer;
+		sf::Sound selectionSound;
 };
