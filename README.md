@@ -5,7 +5,9 @@
 
 ## How to play
 ```
+Use
 git clone https://github.com/docafavarato/cube-invaders
+And run the "main.cpp" file.
 ```
 > Start the game and select a difficulty. Squares are going to start falling from the top, and if they hit the ground you are going to lose a life. 
 
