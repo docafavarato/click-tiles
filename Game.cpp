@@ -3,14 +3,7 @@
 #include <iostream>
 
 void Game::initVariables() {
-	this->endText;
-	this->escText;
-	this->popBuffer;
-	this->popSound;
 	this->destroyOnCollide = true;
-	this->damageBuffer;
-	this->difficulty;
-	this->damageSound;
 	this->window = nullptr;
 	this->points = 0;
 	this->enemySpawnTimerMax = 30.f;
@@ -18,49 +11,54 @@ void Game::initVariables() {
 	this->lifes = 3;
 	this->maxEnemies = 5;
 	this->maxBullets = 5;
+	this->playerShield;
 	this->maxShields = 1;
 	this->shieldCount = 0;
 	this->playerDestroyOnCollide = false;
+	this->shieldActivated = false;
+	this->playerShieldDefenses = 0;
+	this->maxPlayerShield = 1;
 }
 
 void Game::initWindow() {
 	this->videoMode.height = 600;
 	this->videoMode.width = 800;
-	this->window = new sf::RenderWindow(this->videoMode, "Game1", sf::Style::Titlebar | sf::Style::Close);
+	this->window = new sf::RenderWindow(this->videoMode, "Cube invaders", sf::Style::Titlebar | sf::Style::Close);
 	this->window->setFramerateLimit(60);
 	
 }
 
+// Sounds
 void Game::playShootSound() {
-	shootBuffer.loadFromFile("shoot.wav");
+	shootBuffer.loadFromFile("sounds/shoot.wav");
 	shootSound.setBuffer(shootBuffer);
 	shootSound.play();
 }
 
 void Game::playKillSound() {
-	popBuffer.loadFromFile("explosion_1.wav");
+	popBuffer.loadFromFile("sounds/explosion_1.wav");
 	popSound.setBuffer(popBuffer);
 	popSound.play();
 }
 
 void Game::playDamageSound() {
-	damageBuffer.loadFromFile("damage.wav");
+	damageBuffer.loadFromFile("sounds/damage.wav");
 	damageSound.setBuffer(damageBuffer);
 	damageSound.play();
 }
 
 void Game::playGameOverSound() {
-	gameOverSound.openFromFile("game_over.wav");
+	gameOverSound.openFromFile("sounds/game_over.wav");
 	gameOverSound.play();
 }
 
 void Game::playSoundTrack() {
-	soundTrack.openFromFile("soundtrack.ogg");
+	soundTrack.openFromFile("sounds/soundtrack.ogg");
 	soundTrack.play();
 }
 
+// Inits
 void Game::initEnemies() {
-	this->enemy.setPosition(10.f, 10.f);
 	this->enemy.setSize(sf::Vector2f(100.f, 100.f));
 	this->enemy.setScale(sf::Vector2f(0.5f, 0.5f));
 	this->enemy.setFillColor(sf::Color::Red);
@@ -69,7 +67,7 @@ void Game::initEnemies() {
 }
 
 void Game::initPlayer() {
-	this->line.setPosition(0, 400);
+	this->line.setPosition(0, 520);
 	this->line.setSize(sf::Vector2f(800, 3));
 	this->player.setPosition(380.f, 500.f);
 	this->player.setSize(sf::Vector2f(60.f, 60.f));
@@ -77,6 +75,12 @@ void Game::initPlayer() {
 	this->player.setFillColor(sf::Color::Green);
 	this->player.setOutlineColor(sf::Color::Cyan);
 	this->player.setOutlineThickness(5.f);
+}
+
+void Game::initWorld() {
+	this->backgroundTexture.loadFromFile("images/background.jpg");
+	this->background.setTexture(this->backgroundTexture);
+	this->background.setScale(1, 1);
 }
 
 void Game::initBullet() {
@@ -87,6 +91,13 @@ void Game::initBullet() {
 void Game::initShield() {
 	this->shield.setSize(sf::Vector2f(150, 4));
 	this->shield.setFillColor(sf::Color::Blue);
+}
+
+void Game::initPlayerShield() {
+	this->playerShield.setSize(sf::Vector2f(75.f, 75.f));
+	this->playerShield.setScale(sf::Vector2f(0.5f, 0.5f));
+	this->playerShield.setOutlineColor(sf::Color::Red);
+	this->playerShield.setOutlineThickness(5.f);
 }
 
 void Game::initFont() {
@@ -120,11 +131,17 @@ void Game::initFont() {
 	this->window->draw(lifesText);
 }
 
-void Game::endGame() {
+// Game status
+void Game::clearGame() {
 	this->soundTrack.stop();
-	this->playGameOverSound();
 	this->enemies.clear();
+	this->bullets.clear();
+	this->shields.clear();
 	this->window->clear();
+}
+
+void Game::endGame() {
+	this->clearGame();
 
 	font.loadFromFile("metropolian-1.ttf");
 
@@ -142,8 +159,6 @@ void Game::endGame() {
 
 	this->window->draw(this->endText);
 	this->window->draw(this->escText);
-	
-	
 }
 
 void Game::updateGameStatus() {
@@ -159,6 +174,7 @@ void Game::updateGameStatus() {
 	}
 }
 
+// Poll events
 void Game::pollEvents() {
 	while (this->window->pollEvent(this->ev)) {
 		if (this->ev.type == sf::Event::Closed) {
@@ -184,10 +200,17 @@ void Game::pollEvents() {
 					spawnShield();
 				}
 			}
+
+			if (ev.key.code == sf::Keyboard::A) {
+				if (this->playerShields.size() < this->maxPlayerShield) {
+					spawnPlayerShield();
+				}
+			}
 		}
 	}
 }
 
+// Spawns
 void Game::spawnEnemies() {
 	this->enemy.setPosition(
 		static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - this->enemy.getSize().x)),
@@ -208,12 +231,20 @@ void Game::spawnShield() {
 	this->shields.push_back(this->shield);
 }
 
+void Game::spawnPlayerShield() {
+	this->shieldActivated = true;
+	this->playerShield.setPosition(this->player.getPosition().x, this->player.getPosition().y);
+	this->playerShields.push_back(this->playerShield);
+}
+
+// Updates
 void Game::updateMousePositions() {
 	this->mousePosWindow = sf::Mouse::getPosition(*this->window);
 	this->mousePosView = this->window->mapPixelToCoords(this->mousePosWindow);
 }
 
 void Game::updateEnemies() {
+	this->enemy.rotate(rand() % 360);
 	if (this->enemies.size() < this->maxEnemies) {
 		if (this->enemySpawnTimer >= this->enemySpawnTimerMax) {
 			this->spawnEnemies();
@@ -238,17 +269,24 @@ void Game::updateEnemies() {
 		}
 
 		if (this->enemies[i].getGlobalBounds().intersects(this->player.getGlobalBounds())) {
-			if (!this->playerDestroyOnCollide) {
-				deleted = true;
-				this->lifes--;	
-				this->playDamageSound();
-			}
-			else {
-				deleted = true;
+			if (shieldActivated) {
 				this->points++;
+				this->playerShieldDefenses++;
+				this->enemies.erase(this->enemies.begin() + i);
 				this->playKillSound();
 			}
-			
+			else {
+				if (!this->playerDestroyOnCollide) {
+					deleted = true;
+					this->lifes--;
+					this->playDamageSound();
+				}
+				else {
+					deleted = true;
+					this->points++;
+					this->playKillSound();
+				}
+			}
 		}
 
 		for (int e = 0; e < this->bullets.size(); e++) {
@@ -273,7 +311,7 @@ void Game::updateEnemies() {
 		}
 		
 
-		if (this->enemies[i].getPosition().y > this->window->getSize().y) {
+		if (this->enemies[i].getPosition().y > 520) {
 			this->lifes--;
 			deleted = true;
 			this->playDamageSound();
@@ -286,43 +324,42 @@ void Game::updateEnemies() {
 	}
 }
 
+void Game::updateCollision() {
+
+	if (this->player.getPosition().y > (this->window->getSize().y) - 40) {
+		this->player.setPosition(this->player.getPosition().x, (this->player.getPosition().y) - 5);
+	}
+
+	if (this->player.getPosition().y < 40) {
+		this->player.setPosition(this->player.getPosition().x, (this->player.getPosition().y) + 5);
+	}
+
+	if (this->player.getPosition().x > (this->window->getSize().x - 50)) {
+		this->player.setPosition((this->player.getPosition().x) - 5,this->player.getPosition().y);
+	}
+
+	if (this->player.getPosition().x < 20) {
+		this->player.setPosition((this->player.getPosition().x) + 5, this->player.getPosition().y);
+	}
+}
+
 void Game::updatePlayer() {
-	if (this->ev.type == sf::Event::KeyPressed) {
-		if (this->player.getPosition().y > (this->window->getSize().y - 50)) {
-			this->player.move(0.f, -1.f);
-		}
-		else if (this->player.getPosition().y < 40) {
-			this->player.move(0.f, 1.f);
-		}
-		else if (this->player.getPosition().x > (this->window->getSize().x - 50)) {
-			this->player.move(-1.f, 0.f);
-		}
-		else if (this->player.getPosition().x < 30) {
-			this->player.move(1.f, 0.f);
-		}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) { 
+		this->player.move(0.f, -8.f);	
+	}
 
-		else {
-			if (ev.key.code == sf::Keyboard::Up) {
-				this->player.move(0.f, -10.f);
-			}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+		this->player.move(0.f, 8.f);
+	}
 
-			if (ev.key.code == sf::Keyboard::Down) {
-				this->player.move(0.f, 10.f);
-			}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+		this->player.move(8.f, 0.f);
+	}
 
-			if (ev.key.code == sf::Keyboard::Right) {
-				this->player.move(10.f, 0.f);
-			}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+		this->player.move(-8.f, 0.f);
+	}
 
-			if (ev.key.code == sf::Keyboard::Left) {
-				this->player.move(-10.f, 0.f);
-			}
-
-			if (ev.key.code == sf::Keyboard::Space) {
-				this->bullet.setPosition(1, 1);
-			}
-		}
-	} 
 }
 
 void Game::updateBullet() {
@@ -337,13 +374,40 @@ void Game::updateBullet() {
 
 void Game::updateShield() {
 	for (int i = 0; i < this->shields.size(); i++) {
-		if (shieldCount == 2) {
+		if (shieldCount == 3) {
 			this->shields.erase(this->shields.begin() + i);
-			shieldCount = 0;
+			this->shieldCount = 0;
 		}
 	}
 }
 
+void Game::updatePlayerShield() {
+	std::cout << this->playerShieldDefenses << "\n";
+	for (int i = 0; i < this->playerShields.size(); i++) {
+		if (playerShieldDefenses == 3) {
+			this->playerShields.erase(this->playerShields.begin() + i);
+			this->playerShieldDefenses = 0;
+			this->shieldActivated = false;
+		}
+	}
+
+	for (auto& e : this->playerShields) {
+		e.setPosition(this->player.getPosition().x, this->player.getPosition().y);
+	}
+}
+
+void Game::update() {
+	this->pollEvents();
+	this->updateMousePositions();
+	this->updateEnemies();
+	this->updateBullet();
+	this->updatePlayer();
+	this->updateCollision();
+	this->updateShield();
+	this->updatePlayerShield();
+}
+
+// Renders
 void Game::renderBullet() {
 	for (auto& e : this->bullets) {
 		this->window->draw(e);
@@ -354,15 +418,14 @@ void Game::renderShield() {
 	for (auto& e : this->shields) {
 		this->window->draw(e);
 	}
+
+	for (auto& e : this->playerShields) {
+		this->window->draw(e);
+	}
 }
 
-void Game::update() {
-	this->pollEvents();
-	this->updateMousePositions();
-	this->updateEnemies();
-	this->updateBullet();
-	this->updatePlayer();
-	this->updateShield();
+void Game::renderWorld() {
+	this->window->draw(this->background);
 }
 
 
@@ -380,6 +443,8 @@ void Game::renderPlayer() {
 void Game::render() {
 	this->window->clear();
 
+	this->renderWorld();
+
 	this->renderEnemies();
 	this->renderPlayer();
 	this->renderBullet();
@@ -390,14 +455,18 @@ void Game::render() {
 	this->window->display();
 }
 
+
+// Game
 Game::Game() {
 	this->playSoundTrack();
 	this->initVariables();
 	this->initBullet();
 	this->initShield();
+	this->initPlayerShield();
 	this->initPlayer();
 	this->initWindow();
 	this->initEnemies();
+	this->initWorld();
 }
 
 Game::~Game() {

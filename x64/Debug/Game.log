@@ -1,2 +1,3 @@
-﻿  menu.cpp
+﻿  Game.cpp
+F:\Visualrepos\Game\Game\Game.cpp(247,28): warning C4244: 'argumento': conversão de 'int' para 'float', possível perda de dados
   Game.vcxproj -> F:\Visualrepos\Game\x64\Debug\Game.exe

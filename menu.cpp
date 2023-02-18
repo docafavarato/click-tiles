@@ -31,12 +31,14 @@ Menu::Menu() {
 	this->initWindow();
 }
 
+// Sounds
 void Menu::playMenuSelectionSound() {
-	selectionBuffer.loadFromFile("menu_selection.wav");
+	selectionBuffer.loadFromFile("sounds/menu_selection.wav");
 	selectionSound.setBuffer(selectionBuffer);
 	selectionSound.play();
 }
 
+// Menu selectors
 void Menu::MoveUp() {
 	if (selectedItemIndex - 1 >= 0) {
 		text[selectedItemIndex].setFillColor(sf::Color::Red);
@@ -57,7 +59,7 @@ void Menu::MoveDown() {
 	this->playMenuSelectionSound();
 }
 
-
+// Inits
 void Menu::initVariables() {
 	this->window = nullptr;
 }
@@ -70,6 +72,7 @@ void Menu::initWindow() {
 
 }
 
+// Poll events
 void Menu::pollEvents() {
 	while (this->window->pollEvent(this->ev)) {
 		if (this->ev.type == sf::Event::Closed) {
@@ -125,6 +128,7 @@ void Menu::pollEvents() {
 	}
 }
 
+// Renders
 void Menu::renderMenu() {
 	for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++) {
 		this->window->draw(text[i]);
@@ -136,16 +140,18 @@ void Menu::renderMenu() {
 	this->window->draw(instructions);
 }
 
-void Menu::update() {
-	this->pollEvents();
-}
-
 void Menu::render() {
 	this->window->clear();
 	this->renderMenu();
 	this->window->display();
 }
 
+// Updates
+void Menu::update() {
+	this->pollEvents();
+}
+
+// Menu
 Menu::~Menu() {
 	delete this->window;
 }

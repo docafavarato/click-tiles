@@ -3,7 +3,6 @@
 #include <iostream>
 
 int main() {
-    // Init srandom
     std::srand(static_cast<unsigned>(time(NULL)));
 
     // Init game engine
