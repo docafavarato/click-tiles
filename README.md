@@ -4,8 +4,7 @@
 > Cube invaders is a game made in C++ with the SFML engine. It's inspired by Space Invaders and Asteroids.
 
 ## How to play
-
-> Clone the repository with the following command: ```git clone https://github.com/docafavarato/cube-invaders``` and run the "main.cpp" file.
+ Clone the repository with the following command: ```git clone https://github.com/docafavarato/cube-invaders``` and run the "main.cpp" file.
 
 > Start the game and select a difficulty. Squares are going to start falling from the top, and if they hit the ground you are going to lose a life. 
 
